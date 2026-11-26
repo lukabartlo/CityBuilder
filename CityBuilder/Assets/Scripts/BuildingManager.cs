@@ -1,10 +1,15 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BuildingManager : MonoBehaviour
 {
     public GameObject[] objects;
     private GameObject pendingObject;
 
+    public float gridSize;
+    private bool gridOn = true;
+    [SerializeField] private Toggle gridToggle; 
+    
     private Vector3 pos;
     
     private RaycastHit hit;
@@ -14,12 +19,24 @@ public class BuildingManager : MonoBehaviour
     {
         if (pendingObject != null)
         {
-            pendingObject.transform.position = pos;
-        }
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            PlaceObject();
+            if (gridOn)
+            {
+                pendingObject.transform.position = new Vector3(
+                    RoundToNearestGrid(pos.x),
+                    RoundToNearestGrid(pos.y),
+                    RoundToNearestGrid(pos.z)
+                    );
+            }
+            
+            else
+            {
+                pendingObject.transform.position = pos;
+            }
+            
+            if (Input.GetMouseButtonDown(0))
+            {
+                PlaceObject();
+            }
         }
     }
     
@@ -41,5 +58,28 @@ public class BuildingManager : MonoBehaviour
     public void SelectObject(int index)
     {
         pendingObject = Instantiate(objects[index], pos, Quaternion.identity);
+    }
+
+    public void ToggleGrid()
+    {
+        if (gridToggle.isOn)
+        {
+            gridOn = true;
+        }
+        else
+        {
+            gridOn = false;
+        }
+    }
+
+    private float RoundToNearestGrid(float pos)
+    {
+        float xDiff = pos % gridSize;
+        pos -= xDiff;
+        if (xDiff > (gridSize / 2))
+        {
+            pos += gridSize;
+        }
+        return pos;
     }
 }
